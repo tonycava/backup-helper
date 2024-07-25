@@ -15,8 +15,8 @@ BORG_OPTS="--stats --one-file-system --compression lz4 --checkpoint-interval 864
 ROOT_ARCHIVE_NAME="$HOSTNAME-root-$DATE"
 HOME_ARCHIVE_NAME="$HOSTNAME-home-$DATE"
 
-# Create a new backup
-sudo borg create $BORG_OPTS \
+# Create a new root backup
+sudo -E borg create $BORG_OPTS \
   "$BORG_REPO::$ROOT_ARCHIVE_NAME" \
   / /boot \
   --exclude /proc \
@@ -35,12 +35,12 @@ sudo borg create $BORG_OPTS \
   --exclude /root/.cache \
   --exclude "$BORG_REPO"
 
-# Create home backup
-sudo borg create $BORG_OPTS \
+# Create a new home backup
+sudo -E borg create $BORG_OPTS \
   "$BORG_REPO::$HOME_ARCHIVE_NAME" \
   /home \
   --exclude 'sh:home/*/.cache'
 
-sudo borg delete --list --first 2 --sort timestamp $BORG_REPO
+sudo -E borg delete --list --first 2 --sort timestamp $BORG_REPO
 
-sudo aws s3 sync "$BORG_REPO" "s3://syncovery-backup/backups/backup-$DATE"
+sudo -E aws s3 sync "$BORG_REPO" "s3://syncovery-backups/backup-$DATE"
